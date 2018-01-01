@@ -130,9 +130,13 @@ screen check_internet_downloader:
 
     if internet_on():
         python:
-            # (modid, name, author, description, image)
-            from modloader.modconfig import github_downloadable_mods
-            contents = github_downloadable_mods()
+            # (modid, name, author, description, image) (for github)
+            # (id, name, author, desc, image) (for steam)
+            #from modloader.modconfig import github_downloadable_mods
+            from modloader.modconfig import steam_downloadable_mods
+            
+            #contents = github_downloadable_mods()
+            contents = steam_downloadable_mods()
 
         # (modid, name, author, description, image)
         #use modmenu_mod_content(modid=contents[0][0],
@@ -354,7 +358,8 @@ screen modmenu_mod_content(modid, name, author, description, url):
 screen modmenu_install_confirm(modid, modname) tag smallscreen2:
     modal True
     python:
-        from modloader.modconfig import download_github_mod
+        #from modloader.modconfig import download_github_mod
+        from modloader.modconfig import download_steam_mod
 
     add "image/ui/nvlscreen.png" at zoom_fade_in:
         xcenter 0.5 ycenter 0.5 size (1921, 1081) xoffset -1 yoffset -1
@@ -368,7 +373,7 @@ screen modmenu_install_confirm(modid, modname) tag smallscreen2:
             textbutton "Yes":
                 action [Hide("modmenu_install_confirm"),
                         Play("audio", "se/sounds/close.ogg"),
-                        lambda download_github_mod=download_github_mod, modname=modname, modid=modid: download_github_mod(modname, modid),
+                        lambda download_steam_mod=download_steam_mod, modname=modname, modid=modid: download_steam_mod(modid, modname),
                         Show("modmenu_download")]
 
                 style "yesnobutton"
@@ -429,7 +434,8 @@ screen modmenu_remove_confirm_2(modname, filename) tag smallscreen2:
 screen modmenu_nointernet() tag smallscreen2:
     modal True
     python:
-        from modloader.modconfig import download_github_mod
+        #from modloader.modconfig import download_github_mod
+        pass
 
     add "image/ui/nvlscreen.png" at zoom_fade_in:
         xcenter 0.5 ycenter 0.5 size (1921, 1081) xoffset -1 yoffset -1

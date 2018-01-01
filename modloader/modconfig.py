@@ -21,11 +21,14 @@ from renpy.display.imagelike import Solid
 from renpy.ui import Action
 
 from modloader.modinfo import get_mods
-from modloader import get_mod_path
+from modloader import get_mod_path, steamhandler
 
 
 BRANCHES_API = "https://api.github.com/repos/AWSW-Modding/AWSW-Modtools/branches"
 ZIP_LOCATION = "https://github.com/AWSW-Modding/AWSW-Modtools/archive/{mod_name}.zip"
+
+#steammgr = steamhandler.get_instance()
+
 
 
 
@@ -106,6 +109,17 @@ def github_downloadable_mods():
     return sorted(data, key=lambda mod: mod.mod_name.lower())
 
 
+
+@cache
+def steam_downloadable_mods():
+    # A different format,
+	# (id, mod_name, author, desc, image_url)
+	print("a")
+	print(steamhandler.get_instance())
+	print("b")
+	return sorted(steamhandler.get_instance().GetAllItems(), key=lambda mod: mod[1])
+
+
 def download_github_mod(name, download_link, show_download=True, reload_script=True):
     if show_download:
         show_message("Downloading {}".format(name))
@@ -121,6 +135,48 @@ def download_github_mod(name, download_link, show_download=True, reload_script=T
     if reload_script:
         show_message("Reloading Game...")
         restart_python()
+	
+
+def download_steam_mod(id, name, reload_script=True):
+	steammgr = steamhandler.get_instance()
+	# (id, mod_name, author, desc, image_url)
+	# Again, global variables!
+	global _result_2
+	global _complete_2
+	print("Oh god why")
+	_result_2 = None
+	_complete_2 = False
+	
+    #show_message("Downloading...")
+	
+	def cb(item):
+		# Copy the folder
+		src = item[0].filepath
+		print(src)
+		
+		dest = os.path.join(os.getcwd(), "game", "mods", name)
+		print(dest)
+		
+		shutil.copytree(src, dest)
+		print(src + " -> " + dest)
+		
+		if reload_script:
+			restart_python()
+		
+		global _complete_2
+		_complete_2 = True
+	
+	steammgr.register_callback(steamhandler.PyCallback.Download, cb)
+	
+	print(id)
+	print(type(id))
+	print(steammgr.DownloadItem(id))
+	
+	while not _complete_2:
+		pass
+		
+	print("All done")
+
 
 class UpdateModtools(Action):
     def __init__(self):
